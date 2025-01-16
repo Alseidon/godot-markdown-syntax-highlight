@@ -4,6 +4,7 @@ class_name MarkdownSyntaxHighlighter
 func _get_name() -> String:
 	return "Markdown"
 
+
 func _get_supported_languages() -> PackedStringArray:
 	return ["TextFile"]
 

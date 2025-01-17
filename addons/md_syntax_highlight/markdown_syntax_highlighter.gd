@@ -3,18 +3,16 @@ extends EditorSyntaxHighlighter
 class_name MarkdownSyntaxHighlighter
 
 const colors_heading: Array[Color] = [Color.RED, Color.ORANGE, Color.YELLOW]
-const colors_list: Array[Color] = [Color.SKY_BLUE]
+#const colors_list: Array[Color] = [Color.AQUA]
+const colors_list: Array[Color] = [Color.CADET_BLUE]
 
-#const color_comment: Color = Color.DIM_GRAY
-var color_emph: Color = Color.LIGHT_SALMON
-var color_strong: Color = Color.SALMON
-var color_base: Color = Color.WHITE_SMOKE
+const color_code: Color = Color.LIGHT_SLATE_GRAY
+const color_emph: Color = Color.LIGHT_SALMON
+const color_strong: Color = Color.SALMON
+const color_base: Color = Color.WHITE
 
-
-func init_colors_from_theme() -> void:
-	var root: Control = EditorInterface.get_base_control()
-	#color_base = root.get_theme_color("base_color", "Editor")
-	#color_emph = root.get_theme_color("accent_color", "Editor")
+#func init_colors_from_theme() -> void:
+#var root: Control = EditorInterface.get_base_control()
 
 
 func _get_name() -> String:
@@ -61,18 +59,62 @@ func _add_list_color_map(line: String) -> Dictionary:
 
 
 func _add_numbered_list_color_map(line: String) -> Dictionary:
-	var stripped_line: String = line.strip_edges(true, false)
-	if (
-		stripped_line[0] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-		and stripped_line[1] in [".", ")"]
-	):
-		var numbered_list_marker: int = line.find(stripped_line[0])
-		return {
+	var regex_start: RegEx = RegEx.new()
+	regex_start.compile(r"^\d+[\.\)]")
+	var re_match: RegExMatch = regex_start.search(line)
+	if re_match != null:
+		var numbered_list_marker: int = re_match.get_start()
+		var color_map: Dictionary = {
 			numbered_list_marker: {"color": colors_list[0]},
 			numbered_list_marker + 2: {"color": color_base},
 		}
+		return color_map
 	else:
 		return {}
+
+
+func _add_emph_color_map(line: String) -> Dictionary:
+	var regex_underscore: RegEx = RegEx.new()
+	regex_underscore.compile(r"([^_](?<emph>_[^_]+_)|(?<emph>_[^_]+_)[^_])")
+	var regex_star: RegEx = RegEx.new()
+	regex_star.compile(r"([^\*](?<emph>\*[^\*]+\*)|(?<emph>\*[^\*]+\*)[^\*])")
+	var re_match_underscore: Array[RegExMatch] = regex_underscore.search_all(line)
+	var re_match_star: Array[RegExMatch] = regex_star.search_all(line)
+	var color_map: Dictionary = {}
+	for m: RegExMatch in re_match_underscore:
+		color_map[m.get_start("emph")] = {"color": color_emph}
+		color_map[m.get_end("emph")] = {"color": color_base}
+	for m: RegExMatch in re_match_star:
+		color_map[m.get_start("emph")] = {"color": color_emph}
+		color_map[m.get_end("emph")] = {"color": color_base}
+	return color_map
+
+
+func _add_strong_color_map(line: String) -> Dictionary:
+	var regex_underscore: RegEx = RegEx.new()
+	regex_underscore.compile(r"_{2,}.+_{2,}")
+	var regex_star: RegEx = RegEx.new()
+	regex_star.compile(r"\*{2,}.+\*{2,}")
+	var re_match_underscore: Array[RegExMatch] = regex_underscore.search_all(line)
+	var re_match_star: Array[RegExMatch] = regex_star.search_all(line)
+	var color_map: Dictionary = {}
+	for m: RegExMatch in re_match_underscore:
+		color_map[m.get_start()] = {"color": color_strong}
+		color_map[m.get_end()] = {"color": color_base}
+	for m: RegExMatch in re_match_star:
+		color_map[m.get_start()] = {"color": color_strong}
+		color_map[m.get_end()] = {"color": color_base}
+	return color_map
+
+
+func _add_code_color_map(line: String) -> Dictionary:
+	var color_map: Dictionary = {}
+	var regex: RegEx = RegEx.new()
+	regex.compile(r"`[^`]+`")
+	for m: RegExMatch in regex.search_all(line):
+		color_map[m.get_start()] = {"color": color_code}
+		color_map[m.get_end()] = {"color": color_base}
+	return color_map
 
 
 func _get_line_syntax_highlighting(line_number: int) -> Dictionary:
@@ -85,6 +127,9 @@ func _get_line_syntax_highlighting(line_number: int) -> Dictionary:
 		color_map[0] = {"color": _get_heading_color(heading_level)}
 		return color_map
 
-	color_map.merge(_add_list_color_map(line))
-	color_map.merge(_add_numbered_list_color_map(line))
+	color_map.merge(_add_list_color_map(line), true)
+	color_map.merge(_add_numbered_list_color_map(line), true)
+	color_map.merge(_add_emph_color_map(line), true)
+	color_map.merge(_add_strong_color_map(line), true)
+	color_map.merge(_add_code_color_map(line), true)
 	return color_map

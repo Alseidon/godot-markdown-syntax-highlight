@@ -6,6 +6,7 @@ class_name MarkdownSyntaxHighlighter
 const colors_heading: Array[Color] = [Color.RED, Color.ORANGE, Color.YELLOW]
 const colors_list: Array[Color] = [Color.CADET_BLUE]
 
+const color_quote: Color = Color.DIM_GRAY
 const color_code: Color = Color.LIGHT_SLATE_GRAY
 const color_emph: Color = Color.LIGHT_SALMON
 const color_strong: Color = Color.SALMON
@@ -19,8 +20,10 @@ const color_debug: Color = Color.GREEN
 
 #region Full line regexes
 const re_str_header: String = r"^(#{1,6}).*$"
+const re_str_quote: String = r"^\s*>.*$"
 
 var re_header: RegEx
+var re_quote: RegEx
 #endregion
 
 #region Line start regexes
@@ -58,6 +61,9 @@ func check_regexes() -> void:
 	if re_nb_list == null:
 		re_nb_list = RegEx.new()
 		re_nb_list.compile(re_str_nb_list)
+	if re_quote == null:
+		re_quote = RegEx.new()
+		re_quote.compile(re_str_quote)
 
 
 func _get_heading_color(lvl: int) -> Color:
@@ -144,6 +150,10 @@ func _get_line_syntax_highlighting(line_number: int) -> Dictionary:
 	re_match = re_header.search(line)
 	if re_match != null:
 		color_map[0] = {"color": _get_heading_color(re_match.get_string(1).length() - 1)}
+		return color_map
+	re_match = re_quote.search(line)
+	if re_match != null:
+		color_map[0] = {"color": color_quote}
 		return color_map
 
 	var idx: int = 0

@@ -15,6 +15,9 @@ a relentless killer, with a damn high __sex-appeal__.
  - And arms like trunks
 More than enough for the trustful Michael.
 
+> I love you, Michael
+Most famous Bob quote.
+
 #### Even more !
 What?? And he can `code in GDScript` too ??
 

@@ -6,7 +6,6 @@ var markdown_highlighter: MarkdownSyntaxHighlighter
 
 func _enter_tree() -> void:
 	markdown_highlighter = MarkdownSyntaxHighlighter.new()
-	markdown_highlighter.init_colors_from_theme()
 	var script_editor = EditorInterface.get_script_editor()
 	script_editor.register_syntax_highlighter(markdown_highlighter)
 

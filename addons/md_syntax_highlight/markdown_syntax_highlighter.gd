@@ -2,8 +2,8 @@
 extends EditorSyntaxHighlighter
 class_name MarkdownSyntaxHighlighter
 
+#region Colors
 const colors_heading: Array[Color] = [Color.RED, Color.ORANGE, Color.YELLOW]
-#const colors_list: Array[Color] = [Color.AQUA]
 const colors_list: Array[Color] = [Color.CADET_BLUE]
 
 const color_code: Color = Color.LIGHT_SLATE_GRAY
@@ -11,125 +11,138 @@ const color_emph: Color = Color.LIGHT_SALMON
 const color_strong: Color = Color.SALMON
 const color_base: Color = Color.WHITE
 
-#func init_colors_from_theme() -> void:
-#var root: Control = EditorInterface.get_base_control()
+const color_debug: Color = Color.GREEN
+#endregion
+
+#region Full line regexes
+const re_str_header: String = r"^(#{1,6}).*$"
+
+var re_header: RegEx
+#endregion
+
+#region Line start regexes
+const re_str_list: String = r"^\s*([-\+\*])"
+const re_str_nb_list: String = r"^\s*(\d+[\.\)])"
+
+var re_list: RegEx
+var re_nb_list: RegEx
+#endregion
 
 
+#region EditorSyntaxHighlighter overwrite
 func _get_name() -> String:
-	return "Markdown"
+	return "BetterMarkdown"
 
 
 func _get_supported_languages() -> PackedStringArray:
 	return ["TextFile"]
 
 
-func _get_heading_level(line: String) -> int:
-	if line.begins_with("#"):
-		return 1 + _get_heading_level(line.substr(1))
-	else:
-		return -1
+#endregion
+
+
+func check_regexes() -> void:
+	if re_header == null:
+		re_header = RegEx.new()
+		re_header.compile(re_str_header)
+	if re_list == null:
+		re_list = RegEx.new()
+		re_list.compile(re_str_list)
+	if re_nb_list == null:
+		re_nb_list = RegEx.new()
+		re_nb_list.compile(re_str_nb_list)
 
 
 func _get_heading_color(lvl: int) -> Color:
 	return colors_heading[lvl % colors_heading.size()]
 
 
-func _get_list_color(lvl: int) -> Color:
-	return colors_list[lvl % colors_list.size()]
-
-
-#func _get_list_indent_number(line: String, line_nb: int) -> int:
-#return 0
-
-
-func _add_list_color_map(line: String) -> Dictionary:
-	var stripped_line: String = line.strip_edges(true, false)
-	if (
-		stripped_line.begins_with("-")
-		or stripped_line.begins_with("*")
-		or stripped_line.begins_with("+")
-	):
-		var list_marker: int = line.find(stripped_line[0])
-		return {
-			list_marker: {"color": colors_list[0]},
-			list_marker + 1: {"color": color_base},
-		}
-	else:
-		return {}
-
-
-func _add_numbered_list_color_map(line: String) -> Dictionary:
-	var regex_start: RegEx = RegEx.new()
-	regex_start.compile(r"^\d+[\.\)]")
-	var re_match: RegExMatch = regex_start.search(line)
-	if re_match != null:
-		var numbered_list_marker: int = re_match.get_start()
-		var color_map: Dictionary = {
-			numbered_list_marker: {"color": colors_list[0]},
-			numbered_list_marker + 2: {"color": color_base},
-		}
-		return color_map
-	else:
-		return {}
-
-
-func _add_emph_color_map(line: String) -> Dictionary:
-	var regex_underscore: RegEx = RegEx.new()
-	regex_underscore.compile(r"([^_](?<emph>_[^_]+_)|(?<emph>_[^_]+_)[^_])")
-	var regex_star: RegEx = RegEx.new()
-	regex_star.compile(r"([^\*](?<emph>\*[^\*]+\*)|(?<emph>\*[^\*]+\*)[^\*])")
-	var re_match_underscore: Array[RegExMatch] = regex_underscore.search_all(line)
-	var re_match_star: Array[RegExMatch] = regex_star.search_all(line)
-	var color_map: Dictionary = {}
-	for m: RegExMatch in re_match_underscore:
-		color_map[m.get_start("emph")] = {"color": color_emph}
-		color_map[m.get_end("emph")] = {"color": color_base}
-	for m: RegExMatch in re_match_star:
-		color_map[m.get_start("emph")] = {"color": color_emph}
-		color_map[m.get_end("emph")] = {"color": color_base}
-	return color_map
-
-
-func _add_strong_color_map(line: String) -> Dictionary:
-	var regex_underscore: RegEx = RegEx.new()
-	regex_underscore.compile(r"_{2,}.+_{2,}")
-	var regex_star: RegEx = RegEx.new()
-	regex_star.compile(r"\*{2,}.+\*{2,}")
-	var re_match_underscore: Array[RegExMatch] = regex_underscore.search_all(line)
-	var re_match_star: Array[RegExMatch] = regex_star.search_all(line)
-	var color_map: Dictionary = {}
-	for m: RegExMatch in re_match_underscore:
-		color_map[m.get_start()] = {"color": color_strong}
-		color_map[m.get_end()] = {"color": color_base}
-	for m: RegExMatch in re_match_star:
-		color_map[m.get_start()] = {"color": color_strong}
-		color_map[m.get_end()] = {"color": color_base}
-	return color_map
-
-
-func _add_code_color_map(line: String) -> Dictionary:
-	var color_map: Dictionary = {}
-	var regex: RegEx = RegEx.new()
-	regex.compile(r"`[^`]+`")
-	for m: RegExMatch in regex.search_all(line):
-		color_map[m.get_start()] = {"color": color_code}
-		color_map[m.get_end()] = {"color": color_base}
-	return color_map
+func _read_char_standard(line: String, idx: int, color_map: Dictionary) -> int:
+	if idx == line.length():
+		return idx
+	match line[idx]:
+		"_":
+			if idx + 1 == line.length():
+				return idx + 1
+			if line[idx + 1] == "_":
+				#strong
+				var end_i: int = line.find("__", idx + 2)
+				if end_i != -1:
+					color_map[idx] = {"color": color_strong}
+					color_map[end_i + 2] = {"color": color_base}
+					idx = end_i + 2
+				else:
+					idx += 1
+			else:
+				#emph
+				var end_i: int = line.find("_", idx + 1)
+				if end_i != -1:
+					color_map[idx] = {"color": color_emph}
+					color_map[end_i + 1] = {"color": color_base}
+					idx = end_i + 1
+				else:
+					idx += 1
+		"*":
+			if idx + 1 == line.length():
+				return idx + 1
+			if line[idx + 1] == "*":
+				#strong
+				var end_i: int = line.find("**", idx + 2)
+				if end_i != -1:
+					color_map[idx] = {"color": color_strong}
+					color_map[end_i + 2] = {"color": color_base}
+					idx = end_i + 2
+				else:
+					idx += 1
+			else:
+				#emph
+				var end_i: int = line.find("*", idx + 1)
+				if end_i != -1:
+					color_map[idx] = {"color": color_emph}
+					color_map[end_i + 1] = {"color": color_base}
+					idx = end_i + 1
+				else:
+					idx += 1
+		"`":
+			var end_i: int = line.find("`", idx + 1)
+			if end_i != 1:
+				color_map[idx] = {"color": color_code}
+				color_map[end_i + 1] = {"color": color_base}
+				idx = end_i + 1
+			else:
+				idx += 1
+		_:
+			idx += 1
+	return _read_char_standard(line, idx, color_map)
 
 
 func _get_line_syntax_highlighting(line_number: int) -> Dictionary:
+	check_regexes()
 	var color_map: Dictionary = {0: {"color": color_base}}
 	var text_editor: TextEdit = get_text_edit()
 	var line: String = text_editor.get_line(line_number)
-
-	var heading_level: int = _get_heading_level(line)
-	if heading_level != -1:
-		color_map[0] = {"color": _get_heading_color(heading_level)}
+	var re_match: RegExMatch
+	# Full line
+	re_match = re_header.search(line)
+	if re_match != null:
+		color_map[0] = {"color": _get_heading_color(re_match.get_string(1).length() - 1)}
 		return color_map
 
-	color_map.merge(_add_list_color_map(line), true)
-	color_map.merge(_add_numbered_list_color_map(line), true)
-	color_map.merge(_add_emph_color_map(line), true)
-	color_map.merge(_add_strong_color_map(line), true)
-	color_map.merge(_add_code_color_map(line), true)
+	var idx: int = 0
+	# Line start
+	re_match = re_list.search(line)
+	if re_match != null:
+		color_map[re_match.get_start(1)] = {"color": colors_list[0]}
+		color_map[re_match.get_end(1)] = {"color": color_base}
+		idx = re_match.get_end()
+	else:
+		re_match = re_nb_list.search(line)
+		if re_match != null:
+			color_map[re_match.get_start(1)] = {"color": colors_list[0]}
+			color_map[re_match.get_end(1)] = {"color": color_base}
+			idx = re_match.get_end()
+
+	idx = _read_char_standard(line, idx, color_map)
+	color_map[idx] = {"color": color_debug}
+	color_map[idx + 2] = {"color": color_base}
 	return color_map

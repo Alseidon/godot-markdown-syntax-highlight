@@ -16,12 +16,6 @@ Currently, I can only change the colors (so no underline, strikethrough etc.).
 - Lists (with `+`, `-`, `*`, or number+`.` or `)`)
 - Quotes (with `>`)
 - Emphasis and strong emphasis (with single or double `_` or `*`)
-- Code (with `\``).
-- Escapes : _here are \* and \_ in an emph_ (written \\\* and \\\_).
-
-## It works!
-![Isn't this beautiful?](screenshots/it_works.png)
-
-## ... not always
-![Still a WiP after all.](screenshots/still_wip.png)
-(this is handled by the way. But you get the meaning, plenty of bugs)
+- Code (with `\``)
+- Escapes : _here are \* and \_ in an emph_ (written \\\* and \\\_)
+- Links (with [] and ())

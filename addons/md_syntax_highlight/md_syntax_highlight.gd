@@ -1,13 +1,17 @@
 @tool
 extends EditorPlugin
 
-var md_highlighter: MarkdownSyntaxHighlighter
+var markdown_highlighter: MarkdownSyntaxHighlighter
+
 
 func _enter_tree() -> void:
-	print("Hello world")
-	md_highlighter = MarkdownSyntaxHighlighter.new()
-	EditorInterface.get_script_editor().register_syntax_highlighter(md_highlighter)
+	markdown_highlighter = MarkdownSyntaxHighlighter.new()
+	var script_editor = EditorInterface.get_script_editor()
+	script_editor.register_syntax_highlighter(markdown_highlighter)
 
 
 func _exit_tree() -> void:
-	EditorInterface.get_script_editor().unregister_syntax_highlighter(md_highlighter)
+	if is_instance_valid(markdown_highlighter):
+		var script_editor = EditorInterface.get_script_editor()
+		script_editor.unregister_syntax_highlighter(markdown_highlighter)
+		markdown_highlighter = null

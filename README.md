@@ -11,3 +11,7 @@ your project. (At some point I will maybe register this in the Godot asset libra
 in `Edit -> Syntax Highlighter` to "Markdown".
 
 ## It works!
+![Isn't this beautiful?](screenshots/it_works.png)
+
+## ... not always
+![Still a WiP after all.](screenshots/still_wip.png)

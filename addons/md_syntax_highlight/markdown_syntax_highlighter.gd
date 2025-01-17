@@ -11,6 +11,9 @@ const color_emph: Color = Color.LIGHT_SALMON
 const color_strong: Color = Color.SALMON
 const color_base: Color = Color.WHITE
 
+const color_link_text: Color = Color.GREEN_YELLOW
+const color_link_target: Color = Color.NAVY_BLUE
+
 const color_debug: Color = Color.GREEN
 #endregion
 
@@ -28,10 +31,14 @@ var re_list: RegEx
 var re_nb_list: RegEx
 #endregion
 
+#region Other regexes
+
+#endregion
+
 
 #region EditorSyntaxHighlighter overwrite
 func _get_name() -> String:
-	return "BetterMarkdown"
+	return "Markdown"
 
 
 func _get_supported_languages() -> PackedStringArray:
@@ -58,8 +65,8 @@ func _get_heading_color(lvl: int) -> Color:
 
 
 func _read_char_standard(line: String, idx: int, color_map: Dictionary) -> int:
-	if idx == line.length():
-		return idx
+	if idx >= line.length():
+		return line.length()
 	match line[idx]:
 		"_":
 			if idx + 1 == line.length():
@@ -109,6 +116,17 @@ func _read_char_standard(line: String, idx: int, color_map: Dictionary) -> int:
 				color_map[idx] = {"color": color_code}
 				color_map[end_i + 1] = {"color": color_base}
 				idx = end_i + 1
+			else:
+				idx += 1
+		"[":
+			var mid_i: int = line.find("](", idx + 1)
+			if mid_i != -1:
+				var end_i: int = line.find(")", mid_i + 2)
+				if end_i != -1:
+					color_map[idx] = {"color": color_link_text}
+					color_map[mid_i + 1] = {"color": color_link_target}
+					color_map[end_i + 1] = {"color": color_base}
+					idx = end_i
 			else:
 				idx += 1
 		_:

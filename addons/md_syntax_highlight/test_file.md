@@ -17,3 +17,11 @@ More than enough for the trustful Michael.
 
 #### Even more !
 What?? And he can `code in GDScript` too ??
+
+# Tests
+Test__1 __1 23__22132__ *ezez* zaeza *ezez_e_e_e* `€zaae`
+	` zaeaze`
+- Wow
+Here is a [A link !](https://example.com), and another empty one []() and []() zaea [owow]())
+[oh yes a link](to nothing)
+but _[no link :c](https://example.com)_

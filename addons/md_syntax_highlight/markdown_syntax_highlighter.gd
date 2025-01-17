@@ -70,16 +70,27 @@ func _get_heading_color(lvl: int) -> Color:
 	return colors_heading[lvl % colors_heading.size()]
 
 
+func _find_custom(line: String, what: String, from: int = 0) -> int:
+	var i: int = line.find(what, from)
+	if i == 0 or i == -1:
+		return i
+	if line[i - 1] == "\\" and (i == 1 or line[i - 2] != "\\"):
+		return _find_custom(line, what, i + 1)
+	return i
+
+
 func _read_char_standard(line: String, idx: int, color_map: Dictionary) -> int:
 	if idx >= line.length():
 		return line.length()
 	match line[idx]:
+		"\\":
+			idx += 2
 		"_":
 			if idx + 1 == line.length():
 				return idx + 1
 			if line[idx + 1] == "_":
 				#strong
-				var end_i: int = line.find("__", idx + 2)
+				var end_i: int = _find_custom(line, "__", idx + 2)
 				if end_i != -1:
 					color_map[idx] = {"color": color_strong}
 					color_map[end_i + 2] = {"color": color_base}
@@ -88,7 +99,7 @@ func _read_char_standard(line: String, idx: int, color_map: Dictionary) -> int:
 					idx += 1
 			else:
 				#emph
-				var end_i: int = line.find("_", idx + 1)
+				var end_i: int = _find_custom(line, "_", idx + 1)
 				if end_i != -1:
 					color_map[idx] = {"color": color_emph}
 					color_map[end_i + 1] = {"color": color_base}
@@ -100,7 +111,7 @@ func _read_char_standard(line: String, idx: int, color_map: Dictionary) -> int:
 				return idx + 1
 			if line[idx + 1] == "*":
 				#strong
-				var end_i: int = line.find("**", idx + 2)
+				var end_i: int = _find_custom(line, "**", idx + 2)
 				if end_i != -1:
 					color_map[idx] = {"color": color_strong}
 					color_map[end_i + 2] = {"color": color_base}
@@ -109,7 +120,7 @@ func _read_char_standard(line: String, idx: int, color_map: Dictionary) -> int:
 					idx += 1
 			else:
 				#emph
-				var end_i: int = line.find("*", idx + 1)
+				var end_i: int = _find_custom(line, "*", idx + 1)
 				if end_i != -1:
 					color_map[idx] = {"color": color_emph}
 					color_map[end_i + 1] = {"color": color_base}
@@ -117,17 +128,17 @@ func _read_char_standard(line: String, idx: int, color_map: Dictionary) -> int:
 				else:
 					idx += 1
 		"`":
-			var end_i: int = line.find("`", idx + 1)
-			if end_i != 1:
+			var end_i: int = _find_custom(line, "`", idx + 1)
+			if end_i != -1:
 				color_map[idx] = {"color": color_code}
 				color_map[end_i + 1] = {"color": color_base}
 				idx = end_i + 1
 			else:
 				idx += 1
 		"[":
-			var mid_i: int = line.find("](", idx + 1)
+			var mid_i: int = _find_custom(line, "](", idx + 1)
 			if mid_i != -1:
-				var end_i: int = line.find(")", mid_i + 2)
+				var end_i: int = _find_custom(line, ")", mid_i + 2)
 				if end_i != -1:
 					color_map[idx] = {"color": color_link_text}
 					color_map[mid_i + 1] = {"color": color_link_target}

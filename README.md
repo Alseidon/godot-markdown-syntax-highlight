@@ -12,12 +12,12 @@ in `Edit -> Syntax Highlighter` to "Markdown".
 
 ## Currently supported
 Currently, I can only change the colors (so no underline, strikethrough etc.).
-
 - Headings 1 to 6 (three colors cycling)
 - Lists (with `+`, `-`, `*`, or number+`.` or `)`)
 - Quotes (with `>`)
 - Emphasis and strong emphasis (with single or double `_` or `*`)
-- Code (with ```)
+- Code (with `\``).
+- Escapes : _here are \* and \_ in an emph_ (written \\\* and \\\_).
 
 ## It works!
 ![Isn't this beautiful?](screenshots/it_works.png)

@@ -8,6 +8,8 @@ A pale, _very_ beautiful man with:
 ## And Bob
 Well, Bob was a *dwarf*. Yes, a **dwarf**. But this didn't prevent Bob from being
 a relentless killer, with a damn high __sex-appeal__.
+
+### Bonuses
  - A hammer
  - A beard
  - And arms like trunks

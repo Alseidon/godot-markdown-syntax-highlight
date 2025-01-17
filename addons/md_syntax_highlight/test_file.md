@@ -30,4 +30,4 @@ Here is a [A link !](https://example.com), and another empty one []() and []() z
 [oh yes a link](to nothing)
 but _[no link :c](https://example.com)_
 Let's \_ disable_ this ! Or \_ this. HEHEHEHEE_.
-- Code (with ```).
+- Code (with `\``).

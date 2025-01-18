@@ -23,11 +23,13 @@ Most famous Bob quote.
 What?? And he can `code in GDScript` too ??
 
 # Tests
-Test__1 __1 23__22132__ *ezez* zaeza *ezez_e_e_e* `€zaae`
-	` zaeaze`
+Let's go with __some __weird texts__\_or\_messages__. *Or* stars! *and_shit_and_rainbows*
+Password for grandma: `€uro best_m*sic`
 - Wow
-Here is a [A link !](https://example.com), and another empty one []() and []() zaea [owow]())
++ A list!
+* Very wow
+Here is a [a link !](https://example.com), and another empty one []()
+(and [a (very) weird one]())
 [oh yes a link](to nothing)
 but _[no link :c](https://example.com)_
 Let's \_ disable_ this ! Or \_ this. HEHEHEHEE_.
-- Code (with `\``).

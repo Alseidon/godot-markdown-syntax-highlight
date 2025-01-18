@@ -1,10 +1,13 @@
 # Markdown syntax highlight for Godot
 Work in progress; markdown syntax higlight for the Godot editor.
 
+EDIT: this was a fun project, but basically overshadowed by
+[this pull](https://github.com/godotengine/godot/pull/78312), which will add
+most Markdown natively. Still a fun project, I will let the repo open for archiving purposes.
+
 ## How to use
 1. Download and move `addons/md_syntax_highlight` to the `res://addons/` folder of
-your project. (At some point I will maybe register this in the Godot asset library. Maybe.)
-
+your project.
 2. Enable the addon "Markdown Syntax Highlight" in `Project -> Project Settings -> Plugins`.
 
 3. With any text file of your choice opened, change the syntax highlight
